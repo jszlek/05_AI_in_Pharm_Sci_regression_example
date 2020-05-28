@@ -19,13 +19,13 @@ my_data_num <- my_data[,-1] # get data without "Formulation_no" column
 fit_rf = randomForest(Q_perc~., data=my_data_num, ntree = 500) # develop RF model
 importance(fit_rf) # create an importance based on mean decreasing gini
 
-scaled_imp <- scales::rescale(importance(fit_rf), to = c(1,100)) # scale from 0 to 100
+scaled_imp <- scales::rescale(importance(fit_rf), to = c(0,100)) # scale from 0 to 100
 scaled_imp <- scaled_imp[order(scaled_imp, decreasing =TRUE),] # reorder scaled data frame
 
 # plot the variable importance
 pdf(file=paste("res_feature_selection",".pdf", sep=""), height = 8, width = 12)
 op <- par(mar = c(10,4,4,2) + 0.1)
-barplot(scaled_imp[1:25], main="Var imp",
+barplot(scaled_imp[1:25], main="Variable importance",
         names.arg=names(scaled_imp[1:25]), cex.names=0.8, las=2)
 par(op)
 dev.off()
@@ -82,8 +82,8 @@ for(i in 1:10){
   tmp_test = tmp_test[,c(2:20,1,21)]
   tmp_train = tmp_train[,c(2:20,1,21)]
   
-  write.table(tmp_test, file=paste("t-PLGA_",(ncol(tmp_train)-1),"in_no_",i,".txt",sep=""), quote = FALSE, row.names = FALSE)
-  write.table(tmp_train, file=paste("PLGA_",(ncol(tmp_test)-1),"in_no_",i,".txt",sep=""), quote = FALSE, row.names = FALSE)
+  write.table(tmp_test, file=paste("FS_data/t-PLGA_",(ncol(tmp_train)-1),"in_no_",i,".txt",sep=""), quote = FALSE, row.names = FALSE)
+  write.table(tmp_train, file=paste("FS_data/PLGA_",(ncol(tmp_test)-1),"in_no_",i,".txt",sep=""), quote = FALSE, row.names = FALSE)
 }
 
 
@@ -98,7 +98,7 @@ for(i in 1:length(test)){
   tmp_test = tmp_test[, !(names(tmp_test) %in% drops)]
   tmp_train = tmp_train[, !(names(tmp_train) %in% drops)]
   
-  tmp_rf = randomForest(Q_perc~., data=tmp_train, ntree=100, mtry=6) # training of RF models 
+  tmp_rf = randomForest(Q_perc~., data=tmp_train, ntree=500, mtry=10) # training of RF models 
   tmp_pred <- predict(tmp_rf, tmp_test) # testing RF model
   
   results[[i]] <- tmp_pred # saving in results
@@ -119,8 +119,8 @@ for(i in 1:10){
 mean_rf_r2 <- mean(unlist(rf_r2))
 mean_rf_rmse <- mean(unlist(rf_rmse))
 
-cat("Mean 10-fold cv RMSE: ", mean_rf_rmse, sep="")
-cat("Mean 10-fold cv R2: ", mean_rf_r2, sep="")
+cat("Mean 10-fold cv RMSE: ", mean_rf_rmse, "\n", sep="")
+cat("Mean 10-fold cv R2: ", mean_rf_r2, "\n", sep="")
 
 
 # 6) Modeling - Random Forest - Plots
@@ -192,7 +192,7 @@ for(i in 1:length(test_nn)){
   
   
   tmp_nn <- neuralnet(Q_perc ~ . , data=tmp_train_nn,
-                      hidden=c(15,10,5),
+                      hidden=c(9,6,3),
                       linear.output=TRUE,
                       stepmax = 100000,
                       threshold=0.1)
