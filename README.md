@@ -1,5 +1,6 @@
 # 05_AI_in_Pharm_Sci_regression_example  
-## Regression example in R Jupyter notebook
+### Regression example in R Jupyter notebook  
+__Author__: Jakub Szlęk (j.szlek[at]uj.edu.pl)  
 ### Requested libraries:
 `groupdata2`
 `dplyr`
